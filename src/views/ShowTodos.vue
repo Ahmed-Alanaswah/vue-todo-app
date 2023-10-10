@@ -2,7 +2,7 @@
   <div class="about">
     <h1>this is show todos page</h1>
 
-    <table style="width: 100%">
+    <table style="width: 100%" v-if="todoList.length">
       <thead>
         <tr>
           <th>text</th>
@@ -13,37 +13,50 @@
         </tr>
       </thead>
       <tbody>
-        <tr v-for="todo in todoList" :key="todo.id">
+        <tr
+          v-for="(todo, index) in todoList"
+          :key="todo.id"
+          :style="`${
+            todo.isCompleted
+              ? 'background-color:#a1e1b0'
+              : 'background:transparent'
+          } `"
+        >
           <td>{{ todo.text }}</td>
           <td>{{ todo.from }}</td>
           <td>{{ todo.to }}</td>
           <td>{{ new Date(todo.createdAt).toLocaleDateString() }}</td>
           <td>
             <div>
-              <button class="completed">completed</button>
-              <button class="delete">delete</button>
+              <button class="completed" @click="markCompleted(todo)">
+                {{ todo.isCompleted ? "incompleted" : "completed" }}
+              </button>
+              <button class="delete" @click="deleteTodo(index)">delete</button>
             </div>
           </td>
         </tr>
       </tbody>
     </table>
+    <h2 v-else style="line-height: 12">no todos to show</h2>
   </div>
 </template>
 
 <script setup>
-import { onMounted, ref } from "vue";
+import todosMixins from "@/mixins/todo";
 
-const todoList = ref([]);
+const { todoList, addToLocalST } = todosMixins();
 
-const updateTodos = () => {
-  if (localStorage.getItem("todos")) {
-    todoList.value = JSON.parse(localStorage.getItem("todos"));
-  }
+const deleteTodo = (index) => {
+  todoList.value.splice(index, 1);
+  addToLocalST();
 };
 
-onMounted(() => {
-  updateTodos();
-});
+//mark as completed
+
+const markCompleted = (todo) => {
+  todo.isCompleted = !todo.isCompleted;
+  console.log(todo.isCompleted);
+};
 </script>
 
 <style scoped lang="scss">
